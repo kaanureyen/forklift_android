@@ -77,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void bt() async {
     try {
-      connection = await BluetoothConnection.toAddress("98:D3:51:FD:DE:90");
+      connection = await BluetoothConnection.toAddress("00:19:10:08:D5:05");
       //00:19:10:08:D5:05 benimki
       //98:D3:51:FD:DE:90 buraklarınki
       setState(() {
