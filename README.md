@@ -1,6 +1,6 @@
 # kontrol
 
-Proje ödevi
+Proje ödevi. github.com/forklift_arduino için bluetooth kontrolcü android uygulaması.
 
 ## Getting Started
 
