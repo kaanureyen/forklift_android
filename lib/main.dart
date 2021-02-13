@@ -39,48 +39,53 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   BluetoothConnection connection;
-  String t = "";
-  int l = 0;
-  int r = 0;
+  String t = ""; // bluetooth debug text
+  int l = 0; // left (?) power [motor1]
+  int r = 0; // right (?) power [motor2]
   String toSend = "";
-  int sn = 0;
-  String st = "";
+  int sn = 0; // sending serial commands switch
+  String st = ""; // stepper switch
+  int aux1 = 1; // 1: straight -1: reverse
+  int aux2 = 1;
+  bool sw = false; // switch l and r
+  bool invr = false;
+  bool invl = false;
 
   void sending() async {
     String c1 = "";
     String c2 = "";
     String m1 = "";
     String m2 = "";
-    if(l > 0){
+    if (l > 0) {
       c1 = "C,1,1";
-    }else{
+    } else {
       c1 = "C,1,2";
     }
-    if(r>0){
+    if (r > 0) {
       c2 = "C,2,1";
-    }
-    else{
+    } else {
       c2 = "C,2,2";
     }
     m1 = "M,1," + l.toInt().abs().toString();
     m2 = "M,2," + r.toInt().abs().toString();
-    toSend = c1+c2+m1+m2+st;
+    toSend = c1 + c2 + m1 + m2 + st + ",";
     st = "";
-    connection.output
-        .add(Uint8List.fromList(ascii.encode(toSend)));
-    await Future.delayed(Duration(milliseconds: 66));
+    connection.output.add(Uint8List.fromList(ascii.encode(toSend)));
+    await Future.delayed(Duration(milliseconds: 100));
     sending();
   }
 
   void bt() async {
     try {
-      connection = await BluetoothConnection.toAddress("00:19:10:08:D5:05");
+      connection = await BluetoothConnection.toAddress("98:D3:51:FD:DE:90");
+      //00:19:10:08:D5:05 benimki
+      //98:D3:51:FD:DE:90 buraklarınki
       setState(() {
         t = "Connected to the device";
       });
 
       print(t);
-      if(sn == 0){
+      if (sn == 0) {
         sending();
         sn = 1;
       }
@@ -128,8 +133,13 @@ class _MyHomePageState extends State<MyHomePage> {
                       (((sver) * pow(ver, 2) - (shor) * pow(hor, 2)) * 255)
                           .round();
                   //print('left $left right $right');
-                  l = left;
-                  r = right;
+                  l = left * aux1;
+                  r = right * aux2;
+                  if (sw == true) {
+                    int tmp = l;
+                    l = r;
+                    r = tmp;
+                  }
                 },
               ),
               Column(
@@ -149,6 +159,47 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ],
               )
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Checkbox(
+                  value: sw,
+                  onChanged: (x) {
+                    setState(() {
+                      sw = x;
+                    });
+                  }),
+              Text("Switch L-R"),
+              Checkbox(
+                value: invl,
+                onChanged: (x) {
+                  if (x) {
+                    aux1 = -1;
+                  } else {
+                    aux1 = 1;
+                  }
+                  setState(() {
+                    invl = x;
+                  });
+                },
+              ),
+              Text("Invert L"),
+              Checkbox(
+                value: invr,
+                onChanged: (x) {
+                  if (x) {
+                    aux2 = -1;
+                  } else {
+                    aux2 = 1;
+                  }
+                  setState(() {
+                    invr = x;
+                  });
+                },
+              ),
+              Text("Invert R")
             ],
           ),
         ]),
